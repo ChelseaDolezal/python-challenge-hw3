@@ -50,7 +50,7 @@ with open(csvpath) as csv_file:
             min_date = date
 
 
-#ask about the first part of Q 3 in hw assignment
+#find average-1 from total months to compare the total from the previous month
     average = total_change_in_profit / (total_months-1)
 
 
