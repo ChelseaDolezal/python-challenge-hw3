@@ -1,13 +1,19 @@
 import os
 import csv
 
-csvpath = os.path.join('PyPoll', 'Resources', 'election_data.csv')
-csvreader = csvpath
+#path to collect data from resources folder
+csvpath = os.path.join('PyBank', 'Resources', 'budget_data.csv')
 
-#define how many votes we are starting with 
-total_votes = 0
-candidate_votes = {}
-vote_count = {}
+#define variables
+total_months = 0
+total_profits = 0
+max_value = float('-inf')
+max_date = None
+min_value = float("inf")
+min_date = None
+current_profit = 0
+total_change_in_profit = 0
+is_first_row = True
 
 #open and read csv
 with open(csvpath) as csv_file:
@@ -16,38 +22,51 @@ with open(csvpath) as csv_file:
     next(csv_reader)
 
 
-#go through each row. if name is the same from above add one, if it is different start at 0. this will find who has votes and how many
+#for loop to go thru each row to add months, adds profit and losses together
     for row in csv_reader:
-        total_votes += 1
-        name = row[2]
+        last_month_profit = current_profit
+        total_months += 1
+        current_profit = float(row[1])
+        total_profits += current_profit
 
-        if name in candidate_votes.keys():
-            candidate_votes[name] += 1  
-        else:
-            candidate_votes[name]=1
-    output_analysis= "Election Results\n---------------\n"
-    output_analysis+=f'Total Votes: {total_votes}\n--------------\n'
+#find max value in the set     
+        date = row[0]
+        #current month-last month
+        
+        change_in_profit = current_profit - last_month_profit
+        if not is_first_row:
+            total_change_in_profit += change_in_profit
+        else: 
+            is_first_row = False
+         
 
-max_votes = 0
-winner = "name"
-
-#find percent of votes each candidate got
-for candidate, votes in candidate_votes.items():
-    percentage = (votes/total_votes)*100
-
-    output_analysis+=f'{candidate}: {percentage:.3f}% ({votes})\n'
-    if votes > max_votes:
-        max_votes = votes
-        winner = candidate
-
-output_analysis+= "--------------\n"
-output_analysis+=f'winner:{winner}\n'
-output_analysis+= "--------------\n"
-print(output_analysis)
+        if change_in_profit > max_value:
+            max_value = change_in_profit
+            max_date = date
+#find min value in the set
+        date = row[0]
+        if change_in_profit < min_value:
+            min_value = change_in_profit
+            min_date = date
 
 
+#ask about the first part of Q 3 in hw assignment
+    average = total_change_in_profit / (total_months-1)
 
-output_path = os.path.join("PyPoll", "Analysis", "textfile.txt")
+
+
+
+
+#creating variable to store outanalysis for future printing.
+    output_analysis= "Financial Analysis\n-----------\n"
+    output_analysis+=f'Total Months= {total_months}\n'
+    output_analysis+=f'Total= ${total_profits}\n'
+    output_analysis+=f'Average Change= ${average: .2f}\n'
+    output_analysis+=f'Greatest Increase in Profits= {max_date} (${max_value})\n'
+    output_analysis+=f'Greatest Decrease in Profits= {min_date} (${min_value})\n'
+    print(output_analysis)   
+
+output_path = os.path.join("PyBank", "Analysis", "textfile.txt")
 # Initialize csv.writer
 with open(output_path, 'w') as csvfile:
     csvwriter = csv.writer(csvfile, delimiter=',')
